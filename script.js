@@ -114,36 +114,17 @@ async function initializeCheckoutTurnstile() {
 }
 
 async function getOrderSubmissionErrorMessage(error) {
-  if (window.location.origin !== 'http://127.0.0.1:5500') {
-    return 'We could not place your order. Please try again.';
-  }
-
   const response = error?.context;
   if (response instanceof Response) {
     try {
       const payload = await response.clone().json();
       if (typeof payload?.error === 'string') return payload.error;
-      const configurationKeys = [
-        'SUPABASE_URL',
-        'SUPABASE_SERVICE_ROLE_KEY',
-        'TURNSTILE_SECRET_KEY',
-        'TURNSTILE_HOSTNAME'
-      ];
-      if (
-        payload &&
-        configurationKeys.every(key => typeof payload[key] === 'boolean')
-      ) {
-        return `Local configuration diagnostic (true = configured): ${configurationKeys
-          .map(key => `${key}: ${payload[key] ? 'present' : 'missing'}`)
-          .join(', ')}.`;
-      }
     } catch {
-      // Fall back to a generic message when the function response is not JSON.
+      // Use the generic message if the response isn't JSON.
     }
   }
   return 'We could not place your order. Please try again.';
 }
-
 function getCanonicalCheckoutDetails(name, phone, address, notes, items) {
   return {
     customer_name: name,
